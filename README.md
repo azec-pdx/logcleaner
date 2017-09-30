@@ -80,6 +80,11 @@ After the execution of script is done, you should be able to:
 * Assure that program has created `logfile_small.txt.redacted.gz` file, which contains redacted data
 * Assure that the original file `logfile_small.txt.gz` is un-affected by script's execution
 
+After script completes running, your filesystem should look similar to following:
+
+![Testing script running on small file](https://github.com/ZeKoU/logcleaner/raw/master/images/Filesystem_logcleaner.png)
+
+
 If you would like to test script execution on larger dataset, you might find file `logfile.txt.gz` useful. 
 
 To run this program on multiple large files, use following steps.
