@@ -32,7 +32,8 @@
 
 ### Solution
 --
-**Design:**
+
+####Design
 
 - Python language is selected for solution because of it's rich API for text processing and ease of use
 - For purposes of RAM optimization (avoiding reading large files), solution is using memory mapping technique to map large files in address space of the running process. This allows for memory files to behave like both strings and like file objects. For this purpose solution utilizes Python's `mmap` module.
@@ -45,12 +46,16 @@
   - none of the two record's are found in the log line
 - One compromise that solution does is decompressing of the input GZIP archives. This is done because it is not possible to memory-map GZIP archive and then work on sensitive data matching over compressed data. However, solution strives to complete decompression in optimal way by utilizing system calls. While doing this, solution attempts to keep all file metadata properties on decompressed files.
 - Because of the previously described compromise, solution assumes that there is enough storage space available for each log file to be decompressed
-- Program is designed to utilize Python's multiprocessing modules to achieve parallelization in log data processing. Ideally, for each GZIP logfile passed as input argument to program, script will spawn a new process dedicated for redaction of that particular file that will be executed by individual CPU core.
+- Program is designed to utilize Python's multiprocessing modules to achieve parallelization in log data processing. Ideally, for each GZIP logfile passed as input argument to program, script will spawn a new process dedicated for redaction of that particular file that will be executed by individual CPU core. In case where the number of GZIP logfiles passed at program's input is larger than actual number of CPU cores, it is left to OS to schedule processes of all remaining files to available cores.
 - Other lower-level design considerations can be found in [logcleaner.py](https://github.com/ZeKoU/logcleaner/blob/master/logcleaner.py) module's docstring.
 
-**Running program:**
+####Running program
 
-Prerequisite for running this program is to have Python version `2.7.*` installed on your local machine. To run this program in simple scenario use following steps.
+Prerequisite for running this program is to have Python version `2.7.*` installed on your local machine. 
+
+#####Running on a small data sample
+
+To run this script on small data set use following steps.
 
 1. Clone this project to local directory by running:
    	
@@ -85,6 +90,8 @@ After script completes running, your filesystem should look similar to following
 ![Testing script running on small file](https://github.com/ZeKoU/logcleaner/raw/master/images/Filesystem_logcleaner.png)
 
 
+#####Running on a larger data sample
+
 If you would like to test script execution on larger dataset, you might find file `logfile.txt.gz` useful. 
 
 To run this program on multiple large files, use following steps.
@@ -111,3 +118,15 @@ Log file name | Compressed size | Uncompressed size | Lines in logfile | Total l
 `logfile3.txt.gz` | 3.5M | 518M | 3657150 | x | x | x | x |
 `logfile4.txt.gz` | 3.5M | 518M | 3657150 | x | x | x | x |
 `logfile5.txt.gz` | 3.5M | 518M | 3657150 | x | x | x | x |
+
+Running this program for  *MacBook Pro (Mid 2015)* with *2.2 GHz Intel Core i7* CPU and *16 GB RAM* shows following utilization of CPU, Memory and I/O
+
+
+![CPU utilization](https://github.com/ZeKoU/logcleaner/raw/master/images/CPU.png) Each process (running on individual core) is effectively utilizing up to 98.7% CPU
+
+![Memory utilization](https://github.com/ZeKoU/logcleaner/raw/master/images/Memory.png) RAM utilization remains constant at all times while script is running
+
+![I/O performance](https://github.com/ZeKoU/logcleaner/raw/master/images/IO.png) I/O performance chart shows that number of reads remains very low over longer time. This is primarily due to the fact that no data is read once the logfile is memory-mapped. Number of writes is slightly heavier and it comes from the fact that logfiles in  their nature are dense with PII data. However these writes are optimized by using `mmap` module slicing technique.
+
+
+
