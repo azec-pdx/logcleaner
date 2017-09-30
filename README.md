@@ -122,7 +122,7 @@ Log file name | Compressed size | Uncompressed size | Lines in logfile | Total l
 Running this program for  *MacBook Pro (Mid 2015)* with *2.2 GHz Intel Core i7* CPU and *16 GB RAM* shows following utilization of CPU, Memory and I/O
 
 
-![CPU utilization](https://github.com/ZeKoU/logcleaner/raw/master/images/CPU.png) Each process (running on individual core) is effectively utilizing up to 98.7% CPU
+![CPU utilization](https://github.com/ZeKoU/logcleaner/raw/master/images/CPU.png) Each process (running on individual core) is effectively utilizing up to ~98.4% CPU
 
 ![Memory utilization](https://github.com/ZeKoU/logcleaner/raw/master/images/Memory.png) RAM utilization remains constant at all times while script is running
 
