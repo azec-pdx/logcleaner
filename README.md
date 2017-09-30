@@ -33,7 +33,7 @@
 ### Solution
 --
 
-####Design
+#### Design
 
 - Python language is selected for solution because of it's rich API for text processing and ease of use
 - For purposes of RAM optimization (avoiding reading large files), solution is using memory mapping technique to map large files in address space of the running process. This allows for memory files to behave like both strings and like file objects. For this purpose solution utilizes Python's `mmap` module.
@@ -49,11 +49,11 @@
 - Program is designed to utilize Python's multiprocessing modules to achieve parallelization in log data processing. Ideally, for each GZIP logfile passed as input argument to program, script will spawn a new process dedicated for redaction of that particular file that will be executed by individual CPU core. In case where the number of GZIP logfiles passed at program's input is larger than actual number of CPU cores, it is left to OS to schedule processes of all remaining files to available cores.
 - Other lower-level design considerations can be found in [logcleaner.py](https://github.com/ZeKoU/logcleaner/blob/master/logcleaner.py) module's docstring.
 
-####Running program
+#### Running program
 
 Prerequisite for running this program is to have Python version `2.7.*` installed on your local machine. 
 
-#####Running on a small data sample
+##### Running on a small data sample
 
 To run this script on small data set use following steps.
 
@@ -90,7 +90,7 @@ After script completes running, your filesystem should look similar to following
 ![Testing script running on small file](https://github.com/ZeKoU/logcleaner/raw/master/images/Filesystem_logcleaner.png)
 
 
-#####Running on a larger data sample
+##### Running on a larger data sample
 
 If you would like to test script execution on larger dataset, you might find file `logfile.txt.gz` useful. 
 
@@ -107,7 +107,7 @@ To run this program on multiple large files, use following steps.
    python logcleaner.py logfile.txt.gz logfile2.txt.gz logfile3.txt.gz logfile4.txt.gz logfile5.txt.gz
    ```
 
-####Performance
+#### Performance
 
 Running file on 5 GZIP archives shows following performance.
 
