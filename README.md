@@ -24,10 +24,10 @@
 
 **Example Data:**
 
-- File logfile_small.txt.gz contains very basic sample of data. It can be used for program correctness testing.
+- File `logfile_small.txt.gz` contains very basic sample of data. It can be used for program correctness testing.
   Some lines in this file contain only Credit Card records, some lines contain SSN sensitive records,
   some lines contain both and some lines contain none.
-- File logfile.txt.gz is 3.5M GZIP archive. It compresses 518M big logfile that contains PII.
+- File `logfile.txt.gz` is 3.5M GZIP archive. It compresses 518M big logfile that contains PII.
   This file can be copied numerous times to test program execution on multiple "large" files.
 
 ### Solution
@@ -98,16 +98,16 @@ To run this program on multiple large files, use following steps.
 
 1. Replicate `logfile.txt.gz` file to multiple other files by running this one line command in your console:
    
-   ```
+   ```shell
    for file in logfile2.txt.gz logfile3.txt.gz logfile4.txt.gz logfile5.txt.gz; do cp logfile.txt.gz "$file" ; done
    ```
 2. Run program on 5 GZIP archives by running:
    
-   ```
+   ```shell
    python logcleaner.py logfile.txt.gz logfile2.txt.gz logfile3.txt.gz logfile4.txt.gz logfile5.txt.gz
    ```
 
-**Performance:**
+####Performance
 
 Running file on 5 GZIP archives shows following performance.
 
