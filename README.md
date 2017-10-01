@@ -113,15 +113,33 @@ Running file on 5 GZIP archives shows following performance.
 
 Log file name | Compressed size | Uncompressed size | Lines in logfile | Total lines redacted | SSN redacted lines | CC redacted lines | Time spent redacting |
 ------------- | ---------------- | ----------------- | ----------------- | ----------------- | ----------------- | ----------------- | ----------------- |
-`logfile.txt.gz` | 3.5M | 518M | 3657150 | x | x | x | x |
-`logfile2.txt.gz` | 3.5M | 518M | 3657150 | x | x | x | x |
-`logfile3.txt.gz` | 3.5M | 518M | 3657150 | x | x | x | x |
-`logfile4.txt.gz` | 3.5M | 518M | 3657150 | x | x | x | x |
-`logfile5.txt.gz` | 3.5M | 518M | 3657150 | x | x | x | x |
+`logfile.txt.gz` | 3.5M | 518M | 3657150 | 417960 | 313470 | 139320 | 4:48:09.385797 |
+`logfile2.txt.gz` | 3.5M | 518M | 3657150 | 417960 | 313470 | 139320 | 4:45:54.992287 |
+`logfile3.txt.gz` | 3.5M | 518M | 3657150 | 417960 | 313470 | 139320 |  4:40:45.697558 |
+`logfile4.txt.gz` | 3.5M | 518M | 3657150 | 417960 | 313470 | 139320 | 4:44:43.368736 |
+`logfile5.txt.gz` | 3.5M | 518M | 3657150 | 417960 | 313470 | 139320 |   4:38:06.480686 |
 
-Running this program for  *MacBook Pro (Mid 2015)* with *2.2 GHz Intel Core i7* CPU and *16 GB RAM* shows following utilization of CPU, Memory and I/O
+This leads to conclusion that with this implementation it is possible to redact 518MB of uncompressed log data per 1 CPU core in 4h 43min 31sec (average of the above 5 times).
 
-![CPU utilization](https://github.com/ZeKoU/logcleaner/raw/master/images/CPU.png) Each process (running on individual core) is effectively utilizing up to ~98.4% CPU
+Above tests were produced by running program on  *MacBook Pro (Mid 2015)* with *2.2 GHz Intel Core i7* CPU and *16 GB RAM*. This particular processor has 8 independent cores (independent CPU units). This can be easily checked by running:
+
+```python
+import multiprocessing
+multiprocessing.cpu_count()
+```
+
+which on this machine returns result 
+
+`>>>8`
+
+If we ran program with 8 input files, each one would get assigned to one core, which leads us to conclusion that this implementation can process 8*518MB = ~2.6GB of data in 4h 43min 31sec. This equates to 29,257,200 lines being processed with total of 3,343,680 lines being redacted.
+
+Breaking it further, this means that **this implementation can redact  ~1720 lines/sec using 8 CPU cores**
+
+
+During this run, Activity Monitor was showing utilization of CPU, Memory and I/O corroborated in the pictures below.
+
+![CPU utilization](https://github.com/ZeKoU/logcleaner/raw/master/images/CPU.png) Each of 5 processes are running on individual core and effectively utilizing up to ~98.4% CPU. This also shows that Python stands up process for other 3 remaining cores but they remain idle as there is no task assigned to them.
 
 ![Memory utilization](https://github.com/ZeKoU/logcleaner/raw/master/images/Memory.png) RAM utilization remains constant at all times while script is running
 
