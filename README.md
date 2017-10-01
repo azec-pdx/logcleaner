@@ -1,7 +1,7 @@
 # PII Log Redaction (logcleaner.py)
 
 ### Problem
-
+<hr>
 **Scenario:** One of our customers has been inadvertently uploading sensitive personally-identifying information (PII) to our system over a period of several months. The customer has since realized their mistake and removed the data from the system, but some of that information was reflected in debugging logs enabled on the system and will need to be removed. The logs in question are archived to a central location and compressed with the gzip utility.
 
 **Scope/Assumptions:** We are only concerned with the archived logs. Backups, application data and any other storage locations may assumed to have been addressed separately. You may assume that each line of each input log file contains data from one and only one customer record. All relevant log files may assumed to be local to the script being run (i.e. located on the same system).
@@ -120,7 +120,6 @@ Log file name | Compressed size | Uncompressed size | Lines in logfile | Total l
 `logfile5.txt.gz` | 3.5M | 518M | 3657150 | x | x | x | x |
 
 Running this program for  *MacBook Pro (Mid 2015)* with *2.2 GHz Intel Core i7* CPU and *16 GB RAM* shows following utilization of CPU, Memory and I/O
-
 
 ![CPU utilization](https://github.com/ZeKoU/logcleaner/raw/master/images/CPU.png) Each process (running on individual core) is effectively utilizing up to ~98.4% CPU
 
