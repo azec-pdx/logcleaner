@@ -2,8 +2,6 @@
 
 ### Problem
 
---
-
 **Scenario:** One of our customers has been inadvertently uploading sensitive personally-identifying information (PII) to our system over a period of several months. The customer has since realized their mistake and removed the data from the system, but some of that information was reflected in debugging logs enabled on the system and will need to be removed. The logs in question are archived to a central location and compressed with the gzip utility.
 
 **Scope/Assumptions:** We are only concerned with the archived logs. Backups, application data and any other storage locations may assumed to have been addressed separately. You may assume that each line of each input log file contains data from one and only one customer record. All relevant log files may assumed to be local to the script being run (i.e. located on the same system).
@@ -33,7 +31,7 @@
   This file can be copied numerous times to test program execution on multiple "large" files.
 
 ### Solution
---
+<hr>
 
 #### Design
 
