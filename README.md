@@ -44,7 +44,7 @@
   - only a SSN record exists as PII in one log line
   - only a CC record exists as PII in one log line
   - both, a CC and a SSN, records are found in the log line
-  - neither of the two record's are found in the log line
+  - neither of the two records are found in the log line
 - One tradeoff done by the solution is the decompressing of the input GZIP archives. This is done because it is not possible to memory-map the GZIP archive and then perform sensitive data matching over the compressed data. However, the solution strives to complete decompression in an optimal way by utilizing system calls. While doing this, the solution attempts to keep all file metadata properties on decompressed files.
 - Due to the previously described compromise, the solution assumes that there is enough storage space available for each log file to be decompressed.
 - The program is designed to utilize Python's multiprocessing modules to achieve parallelization in the log data processing. Ideally, for each GZIP logfile passed as an input argument to a program, the script will spawn a new process dedicated for redaction of that particular file, which will be executed by an individual CPU core. In cases where the number of GZIP logfiles passed at the program's input is larger than the actual number of CPU cores, it is left to the OS to schedule all processes to the CPU cores as they become available.
