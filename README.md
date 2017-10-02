@@ -25,10 +25,10 @@
 
 **Example Data:**
 
-- File `logfile_small.txt.gz` contains very basic sample of data. It can be used for program correctness testing.
+- File `logfile_small.txt.gz` contains a very basic sample of the data, which can be used for program correctness testing.
   Some lines in this file contain only Credit Card records, some lines contain SSN sensitive records,
-  some lines contain both and some lines contain none.
-- File `logfile.txt.gz` is 3.5M GZIP archive. It compresses 518M big logfile that contains PII.
+  some lines contain both and some lines contain neither.
+- File `logfile.txt.gz` is 3.5MB GZIP archive, which compresses a 518MB log that contains PII.
   This file can be copied numerous times to test program execution on multiple "large" files.
 
 ### Solution
@@ -36,73 +36,73 @@
 
 #### Design
 
-- Python language is selected for solution because of it's rich API for text processing and ease of use
-- For purposes of RAM optimization (avoiding reading large files), solution is using memory mapping technique to map large files in address space of the running process. This allows for memory files to behave like both strings and like file objects. For this purpose solution utilizes Python's `mmap` module.
-- Python's `mmap` module allows us to use the operating system's virtual memory to access the data on the filesystem directly. Instead of making system calls such as *open*, *read* and *lseek* to manipulate a file, memory-mapping puts the data of the file into memory which allows us to directly manipulate files in memory. This greatly improves I/O performance.
-- Solution is optimized to write bare minimum of the data. That data consists of strings **SSN="xxx-xx-xxxx"** and **CC="xxxx-xxxx-xxxx-xxxx"** that are used to redact original sensitive Credit Card and SSN records. Solution accomplishes these minimal writes by using pivots to track matching CC and SSN record positions in each line and then applying `mmap`'s slicing techniques to flush sensitive data record masks to the file. 
-- Solution is considerate of the following cases for sensitive data:
-  - SSN record found standalone in the log line
-  - CC record found standalone in the log line
-  - both CC and SSN record's are found in the log line
-  - none of the two record's are found in the log line
-- One compromise that solution does is decompressing of the input GZIP archives. This is done because it is not possible to memory-map GZIP archive and then work on sensitive data matching over compressed data. However, solution strives to complete decompression in optimal way by utilizing system calls. While doing this, solution attempts to keep all file metadata properties on decompressed files.
-- Because of the previously described compromise, solution assumes that there is enough storage space available for each log file to be decompressed
-- Program is designed to utilize Python's multiprocessing modules to achieve parallelization in log data processing. Ideally, for each GZIP logfile passed as input argument to program, script will spawn a new process dedicated for redaction of that particular file that will be executed by individual CPU core. In case where the number of GZIP logfiles passed at program's input is larger than actual number of CPU cores, it is left to OS to schedule processes of all remaining files to available cores.
+- The Python language is selected to deliver this solution because of it's rich API for text processing and ease of use.
+- For purposes of RAM optimization (to avoid reading large files), the solution is using a memory mapping technique to map large files to an address space of the running process. This allows for memory files to behave like both strings and file objects. For this purpose the solution utilizes Python's `mmap` module.
+- Python's `mmap` module allows us to use the operating system's virtual memory to access the data on the filesystem directly. Instead of making system calls such as *open*, *read* and *lseek* to manipulate a file, memory-mapping puts the data of the file into memory, which allows us to directly manipulate files in memory. This greatly improves the I/O performance.
+- The solution is optimized to write a bare minimum of the data. That data consists of strings **SSN="xxx-xx-xxxx"** and **CC="xxxx-xxxx-xxxx-xxxx"** that are used to redact original sensitive Credit Card and SSN records. Solution accomplishes these minimal writes by using pivots to track matching CC and SSN record positions in each line and then applies the `mmap`'s slicing techniques to flush record masks to the file. 
+- The solution is considerate of the following cases for sensitive data:
+  - only a SSN record exists as PII in one log line
+  - only a CC record exists as PII in one log line
+  - both, a CC and a SSN, records are found in the log line
+  - neither of the two record's are found in the log line
+- One tradeoff done by the solution is the decompressing of the input GZIP archives. This is done because it is not possible to memory-map the GZIP archive and then perform sensitive data matching over the compressed data. However, the solution strives to complete decompression in an optimal way by utilizing system calls. While doing this, the solution attempts to keep all file metadata properties on decompressed files.
+- Due to the previously described compromise, the solution assumes that there is enough storage space available for each log file to be decompressed.
+- The program is designed to utilize Python's multiprocessing modules to achieve parallelization in the log data processing. Ideally, for each GZIP logfile passed as an input argument to a program, the script will spawn a new process dedicated for redaction of that particular file, which will be executed by an individual CPU core. In cases where the number of GZIP logfiles passed at the program's input is larger than the actual number of CPU cores, it is left to the OS to schedule all processes to the CPU cores as they become available.
 - Other lower-level design considerations can be found in [logcleaner.py](https://github.com/ZeKoU/logcleaner/blob/master/logcleaner.py) module's docstring.
 
 #### Running program
 
-Prerequisite for running this program is to have Python version `2.7.*` installed on your local machine. 
+A prerequisite for running this program is to have Python version `2.7.*` installed on your local machine. 
 
 ##### Running on a small data sample
 
-To run this script on small data set use following steps.
+To run this script on a small data set use the following steps:
 
-1. Clone this project to local directory by running:
+1. Clone this project to a local directory by running:
    	
    	```
    	git clone https://github.com/ZeKoU/logcleaner.git
    	```
-2. Move to cloned project directory by running:
+2. Change the current directory (in the console) to the cloned project's directory by running:
 
    ```
    cd logcleaner
    ```
-3. Run program on small sample log data file by running:
+3. Start the program on a small sample log data file by running:
    
    ```
    python logcleaner.py logfile_small.txt.gz
    ```
 
-After the execution of script is done, you should be able to:
+After the execution of the script is done, you should be able to:
 
-* Assure that program has created `redacted.log` file, logging all lines that were redacted
-* Assure that program has created `logfile_small.txt.gz.audit` file, which contains audit metadata including
+* Assure that the program has created `redacted.log` file, which indicates all lines in all files that were redacted.
+* Assure that the program has created `logfile_small.txt.gz.audit` file, which contains audit metadata including
   - Total number of lines processed
   - Total number of lines redacted
-  - Total number of lines with Credit Card data redacted
+  - Total number of lines with CC data redacted
   - Total number of lines with SSN data redacted
   - Total time spent redacting
-* Assure that program has created `logfile_small.txt.redacted.gz` file, which contains redacted data
+* Assure that the program has created `logfile_small.txt.redacted.gz` file, which contains redacted data
 * Assure that the original file `logfile_small.txt.gz` is un-affected by script's execution
 
-After script completes running, your filesystem should look similar to following:
+After the script is completed, your filesystem should look similar to the following:
 
 ![Testing script running on small file](https://github.com/ZeKoU/logcleaner/raw/master/images/Filesystem_logcleaner.png)
 
 
 ##### Running on a larger data sample
 
-If you would like to test script execution on larger dataset, you might find file `logfile.txt.gz` useful. 
+If you would like to test the script execution on a larger dataset, you might find the file `logfile.txt.gz` useful. 
 
-To run this program on multiple large files, use following steps.
+To run this program on multiple large files, use the following steps:
 
-1. Replicate `logfile.txt.gz` file to multiple other files by running this one line command in your console:
+1. Replicate the `logfile.txt.gz` file to multiple other files by running this one line command in your console:
    
    ```shell
    for file in logfile2.txt.gz logfile3.txt.gz logfile4.txt.gz logfile5.txt.gz; do cp logfile.txt.gz "$file" ; done
    ```
-2. Run program on 5 GZIP archives by running:
+2. Run the program on a five GZIP archives by running:
    
    ```shell
    python logcleaner.py logfile.txt.gz logfile2.txt.gz logfile3.txt.gz logfile4.txt.gz logfile5.txt.gz
@@ -110,7 +110,7 @@ To run this program on multiple large files, use following steps.
 
 #### Performance
 
-Running file on 5 GZIP archives shows following performance.
+Running this program on a five GZIP archives shows the performance listed below.
 
 Log file name | Compressed size | Uncompressed size | Lines in logfile | Total lines redacted | SSN redacted lines | CC redacted lines | Time spent redacting |
 ------------- | ---------------- | ----------------- | ----------------- | ----------------- | ----------------- | ----------------- | ----------------- |
@@ -120,31 +120,30 @@ Log file name | Compressed size | Uncompressed size | Lines in logfile | Total l
 `logfile4.txt.gz` | 3.5M | 518M | 3657150 | 417960 | 313470 | 139320 | 4:44:43.368736 |
 `logfile5.txt.gz` | 3.5M | 518M | 3657150 | 417960 | 313470 | 139320 |   4:38:06.480686 |
 
-This leads to conclusion that with this implementation it is possible to redact 518MB of uncompressed log data per 1 CPU core in 4h 43min 31sec (average of the above 5 times).
+This leads to a conclusion that with this implementation it is possible to redact 518MB of uncompressed log data per 1 CPU core in 4h 43min 31sec (average of the above 5 times).
 
-Above tests were produced by running program on  *MacBook Pro (Mid 2015)* with *2.2 GHz Intel Core i7* CPU and *16 GB RAM*. This particular processor has 8 independent cores (independent CPU units). This can be easily checked by running:
+Above tests were produced by running the program on a *MacBook Pro (Mid 2015)* with *2.2 GHz Intel Core i7* CPU and *16 GB RAM*. This particular processor has 8 independent cores, which can be easily checked by running:
 
 ```python
 import multiprocessing
 multiprocessing.cpu_count()
 ```
 
-which on this machine returns result 
+which on this machine returns the following result 
 
 `>>>8`
 
-If we ran program with 8 input files, each one would get assigned to one core, which leads us to conclusion that this implementation can process 8*518MB = ~2.6GB of data in 4h 43min 31sec. This equates to 29,257,200 lines being processed with total of 3,343,680 lines being redacted.
+If we ran a program with 8 input files, each one would get assigned to one core, which leads us to a conclusion that this implementation can process 8*518MB = ~2.6GB of data in 4h 43min 31sec. This equates to 29,257,200 lines being processed with total of 3,343,680 lines being redacted.
 
 Breaking it further, this means that **this implementation can redact  ~1720 lines/sec using 8 CPU cores**
 
+During this run, the Activity Monitor was showing a utilization of CPU, Memory and I/O corroborated in the pictures below.
 
-During this run, Activity Monitor was showing utilization of CPU, Memory and I/O corroborated in the pictures below.
+![CPU utilization](https://github.com/ZeKoU/logcleaner/raw/master/images/CPU.png) Each of the 5 processes were running on an individual core and effectively utilizing up to ~98.4% CPU. This also shows that the solution  stands up the processes for the other 3 remaining cores, however they stay idle as there is no task assigned to them.
 
-![CPU utilization](https://github.com/ZeKoU/logcleaner/raw/master/images/CPU.png) Each of 5 processes are running on individual core and effectively utilizing up to ~98.4% CPU. This also shows that Python stands up process for other 3 remaining cores but they remain idle as there is no task assigned to them.
+![Memory utilization](https://github.com/ZeKoU/logcleaner/raw/master/images/Memory.png) RAM utilization remains constant at all times while the script is running.
 
-![Memory utilization](https://github.com/ZeKoU/logcleaner/raw/master/images/Memory.png) RAM utilization remains constant at all times while script is running
-
-![I/O performance](https://github.com/ZeKoU/logcleaner/raw/master/images/IO.png) I/O performance chart shows that number of reads remains very low over longer time. This is primarily due to the fact that no data is read once the logfile is memory-mapped. Number of writes is slightly heavier and it comes from the fact that logfiles in  their nature are dense with PII data. However these writes are optimized by using `mmap` module slicing technique.
+![I/O performance](https://github.com/ZeKoU/logcleaner/raw/master/images/IO.png) The I/O performance chart shows that number of reads remains very low over a longer period of time. This is primarily due to the fact that no data is read once the logfile is memory-mapped. Number of writes is slightly heavier which comes from the fact that logfiles are dense in nature with PII data. However, these writes are optimized by using the `mmap` module's slicing technique.
 
 
 
